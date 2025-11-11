@@ -39,43 +39,43 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => 
 
   return (
     <section>
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Tambah Transaksi</h2>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Tambah Transaksi</h2>
         <Card>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">Deskripsi</label>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
                 <input
                     type="text"
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Contoh: Gaji bulanan"
-                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
             </div>
             <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700">Tanggal</label>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal</label>
                 <input
                     type="date"
                     id="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
             </div>
             <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Jumlah (Rp)</label>
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Jumlah (Rp)</label>
                 <input
                     type="number"
                     id="amount"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="Contoh: 5000000"
-                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
             </div>
             <fieldset>
-                <legend className="text-sm font-medium text-gray-700">Jenis Transaksi</legend>
+                <legend className="text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Transaksi</legend>
                 <div className="mt-2 flex items-center space-x-6">
                     <div className="flex items-center">
                         <input
@@ -84,9 +84,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => 
                             type="radio"
                             checked={type === TransactionType.INCOME}
                             onChange={() => setType(TransactionType.INCOME)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
                         />
-                        <label htmlFor="income" className="ml-2 block text-sm text-gray-900">
+                        <label htmlFor="income" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                             Pemasukan
                         </label>
                     </div>
@@ -97,16 +97,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => 
                             type="radio"
                             checked={type === TransactionType.EXPENSE}
                             onChange={() => setType(TransactionType.EXPENSE)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
                         />
-                        <label htmlFor="expense" className="ml-2 block text-sm text-gray-900">
+                        <label htmlFor="expense" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                             Pengeluaran
                         </label>
                     </div>
                 </div>
             </fieldset>
             <fieldset>
-                <legend className="text-sm font-medium text-gray-700">Metode Transaksi</legend>
+                <legend className="text-sm font-medium text-gray-700 dark:text-gray-300">Metode Transaksi</legend>
                 <div className="mt-2 flex items-center space-x-6">
                     <div className="flex items-center">
                         <input
@@ -115,9 +115,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => 
                             type="radio"
                             checked={method === TransactionMethod.TRANSFER}
                             onChange={() => setMethod(TransactionMethod.TRANSFER)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
                         />
-                        <label htmlFor="transfer" className="ml-2 block text-sm text-gray-900">
+                        <label htmlFor="transfer" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                             Transfer
                         </label>
                     </div>
@@ -128,9 +128,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => 
                             type="radio"
                             checked={method === TransactionMethod.CASH}
                             onChange={() => setMethod(TransactionMethod.CASH)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
                         />
-                        <label htmlFor="cash" className="ml-2 block text-sm text-gray-900">
+                        <label htmlFor="cash" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                             Tunai
                         </label>
                     </div>

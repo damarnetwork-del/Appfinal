@@ -22,7 +22,12 @@ const SummaryIcon = ({ type }: { type: 'income' | 'expense' | 'balance' }) => {
       </svg>
     ),
   };
-  return <div className={`p-2 rounded-lg bg-${type === 'income' ? 'green' : type === 'expense' ? 'red' : 'blue'}-100`}>{iconMap[type]}</div>;
+  const bgClass = {
+      income: 'bg-green-100 dark:bg-green-500/10',
+      expense: 'bg-red-100 dark:bg-red-500/10',
+      balance: 'bg-blue-100 dark:bg-blue-500/10'
+  }
+  return <div className={`p-2 rounded-lg ${bgClass[type]}`}>{iconMap[type]}</div>;
 }
 
 
@@ -82,17 +87,17 @@ const Summary: React.FC<SummaryProps> = ({ transactions }) => {
 
   return (
     <section>
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Ringkasan Keuangan</h2>
+      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Ringkasan Keuangan</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
             <div className="flex items-start justify-between">
                 <div>
-                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pemasukan</h3>
-                    <p className="text-2xl font-semibold text-gray-800 mt-1">{formatCurrency(totalIncome)}</p>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pemasukan</h3>
+                    <p className="text-2xl font-semibold text-gray-800 dark:text-white mt-1">{formatCurrency(totalIncome)}</p>
                 </div>
                 <SummaryIcon type="income" />
             </div>
-          <div className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-100 space-y-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-4 pt-2 border-t border-gray-100 dark:border-gray-700 space-y-1">
             <div className="flex justify-between"><span>Transfer:</span> <span>{formatCurrency(incomeByTransfer)}</span></div>
             <div className="flex justify-between"><span>Tunai:</span> <span>{formatCurrency(incomeByCash)}</span></div>
           </div>
@@ -100,12 +105,12 @@ const Summary: React.FC<SummaryProps> = ({ transactions }) => {
         <Card>
             <div className="flex items-start justify-between">
                 <div>
-                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pengeluaran</h3>
-                    <p className="text-2xl font-semibold text-gray-800 mt-1">{formatCurrency(totalExpense)}</p>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengeluaran</h3>
+                    <p className="text-2xl font-semibold text-gray-800 dark:text-white mt-1">{formatCurrency(totalExpense)}</p>
                 </div>
                 <SummaryIcon type="expense" />
             </div>
-            <div className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-100 space-y-1">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-4 pt-2 border-t border-gray-100 dark:border-gray-700 space-y-1">
                 <div className="flex justify-between"><span>Transfer:</span> <span>{formatCurrency(expenseByTransfer)}</span></div>
                 <div className="flex justify-between"><span>Tunai:</span> <span>{formatCurrency(expenseByCash)}</span></div>
             </div>
@@ -113,8 +118,8 @@ const Summary: React.FC<SummaryProps> = ({ transactions }) => {
         <Card>
             <div className="flex items-start justify-between">
                 <div>
-                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Saldo Saat Ini</h3>
-                    <p className={`text-2xl font-semibold mt-1 ${balance >= 0 ? 'text-gray-800' : 'text-red-600'}`}>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saldo Saat Ini</h3>
+                    <p className={`text-2xl font-semibold mt-1 ${balance >= 0 ? 'text-gray-800 dark:text-white' : 'text-red-600 dark:text-red-500'}`}>
                         {formatCurrency(balance)}
                     </p>
                 </div>
