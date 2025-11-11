@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 interface LoginPageProps {
@@ -20,18 +21,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-2xl p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-sm">
+        <div className="bg-white rounded-lg shadow-md p-8 space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-indigo-600">Damar Global Network</h1>
-            <p className="text-slate-500 mt-2">Selamat datang, silakan login.</p>
+            <h1 className="text-2xl font-bold text-gray-800">Damar Global Network</h1>
+            <p className="text-gray-500 mt-2">Selamat datang, silakan login.</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-gray-700"
               >
                 Username
               </label>
@@ -41,14 +42,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
-                className="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition"
+                className="mt-1 block w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
                 required
               />
             </div>
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-gray-700"
               >
                 Password
               </label>
@@ -58,7 +59,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition"
+                className="mt-1 block w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
                 required
               />
             </div>
@@ -67,13 +68,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             )}
             <button
               type="submit"
-              className="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105"
+              className="w-full inline-flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
             >
               Login
             </button>
           </form>
         </div>
-         <p className="text-center text-sm text-slate-500 mt-6">&copy; {new Date().getFullYear()} Damar Global Network</p>
+         <p className="text-center text-sm text-gray-500 mt-6">&copy; {new Date().getFullYear()} Damar Global Network</p>
       </div>
     </div>
   );

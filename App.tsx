@@ -103,22 +103,22 @@ function App() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-slate-900">
-      <header className="bg-white shadow-md">
+    <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
+      <header className="bg-white border-b border-gray-200">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-indigo-600">Damar Finance Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
             <button
                 onClick={handleLogout}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="text-sm font-medium text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md px-3 py-1"
             >
                 Logout
             </button>
         </nav>
       </header>
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="container mx-auto p-4 md:p-6">
         <Summary transactions={transactions} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-1 space-y-6">
              <TransactionForm addTransaction={addTransaction} />
              <MonthlyReport transactions={transactions} />
           </div>
