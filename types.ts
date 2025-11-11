@@ -1,4 +1,4 @@
-// FIX: Define enums for transaction types and methods.
+// existing content
 export enum TransactionType {
   INCOME = 'INCOME',
   EXPENSE = 'EXPENSE',
@@ -9,35 +9,27 @@ export enum TransactionMethod {
   CASH = 'CASH',
 }
 
-// FIX: Define the Transaction interface.
 export interface Transaction {
   id: string;
-  date: string; // ISO string date
   description: string;
   amount: number;
   type: TransactionType;
   method: TransactionMethod;
+  date: string;
 }
 
-// FIX: Define enums for subscription types.
+// new content
 export enum SubscriptionType {
-  PPPOE = 'PPPOE',
-  VOUCHER = 'VOUCHER',
+  PPPOE = 'PPPoE',
+  STATIC = 'Static',
+  HOTSPOT = 'Hotspot',
+  VOUCHER = 'Mitra Voucher',
 }
 
-// FIX: Define the PaymentRecord interface for customer payment history.
-export interface PaymentRecord {
-    date: string; // ISO string date
-    amount: number;
-    method: TransactionMethod;
-}
-  
-// FIX: Define the Customer interface.
 export interface Customer {
-    id: string;
-    name: string;
-    phone: string;
-    subscriptionType: SubscriptionType;
-    amount: number;
-    paymentHistory: PaymentRecord[];
+  id: string;
+  name: string;
+  phone: string;
+  subscriptionType: SubscriptionType;
+  amount: number;
 }

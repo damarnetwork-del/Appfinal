@@ -1,8 +1,6 @@
 
-
 import React, { useState } from 'react';
-// FIX: Added file extension to import statement
-import { Transaction, TransactionType, TransactionMethod } from '../types.ts';
+import { Transaction, TransactionType, TransactionMethod } from '../types';
 import Card from './Card';
 
 interface TransactionFormProps {

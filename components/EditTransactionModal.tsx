@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Added file extension to import statement
-import { Transaction, TransactionType, TransactionMethod } from '../types.ts';
+import { Transaction, TransactionType, TransactionMethod } from '../types';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
