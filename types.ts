@@ -1,4 +1,4 @@
-
+// existing content
 export enum TransactionType {
   INCOME = 'INCOME',
   EXPENSE = 'EXPENSE',
@@ -16,4 +16,20 @@ export interface Transaction {
   type: TransactionType;
   method: TransactionMethod;
   date: string;
+}
+
+// new content
+export enum SubscriptionType {
+  PPPOE = 'PPPoE',
+  STATIC = 'Static',
+  HOTSPOT = 'Hotspot',
+  VOUCHER = 'Mitra Voucher',
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  subscriptionType: SubscriptionType;
+  amount: number;
 }
