@@ -29,6 +29,7 @@ export enum SubscriptionType {
 export interface PaymentRecord {
     date: string; // ISO string date
     amount: number;
+    method: TransactionMethod;
 }
   
 // FIX: Define the Customer interface.

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord } from './types';
+import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord, SubscriptionType } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 
 import LoginPage from './components/LoginPage';
@@ -73,10 +73,11 @@ function App() {
     setEditingCustomer(null);
   };
 
-  const confirmPayment = (customerId: string, amount: number) => {
+  const confirmPayment = (customerId: string, amount: number, method: TransactionMethod) => {
     const paymentRecord: PaymentRecord = {
       date: new Date().toISOString(),
       amount,
+      method,
     };
     
     // Add payment to customer's history
@@ -86,10 +87,10 @@ function App() {
     const customer = customers.find(c => c.id === customerId);
     if (customer) {
         addTransaction({
-            description: `Pembayaran dari ${customer.name}`,
+            description: `Pembayaran Langganan - ${customer.name}`,
             amount,
             type: TransactionType.INCOME,
-            method: TransactionMethod.TRANSFER, // Assuming transfer, could be made selectable
+            method: method,
         });
     }
 
@@ -105,7 +106,7 @@ function App() {
     <div className="bg-slate-50 min-h-screen font-sans text-slate-900">
       <header className="bg-white shadow-md">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-indigo-600">Damar Finance Dashboard</h1>
+            <h1 className="text-2xl font-bold text-indigo-600">Damar Global Network</h1>
             <button
                 onClick={handleLogout}
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -116,26 +117,23 @@ function App() {
       </header>
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
         <Summary transactions={transactions} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1 space-y-8">
-             <TransactionForm addTransaction={addTransaction} />
-             <MonthlyReport transactions={transactions} />
-          </div>
-          <div className="lg:col-span-2">
-            <TransactionList 
-                transactions={transactions} 
-                deleteTransaction={deleteTransaction} 
-                onEdit={(t) => setEditingTransaction(t)}
-            />
-          </div>
+        <div className="space-y-8">
+          <TransactionForm addTransaction={addTransaction} />
+          <MonthlyReport transactions={transactions} />
+          <CustomerSection
+              customers={customers}
+              transactions={transactions}
+              addCustomer={addCustomer}
+              deleteCustomer={deleteCustomer}
+              onEdit={(c) => setEditingCustomer(c)}
+              onConfirmPayment={(c) => setConfirmingPaymentCustomer(c)}
+          />
+          <TransactionList 
+              transactions={transactions} 
+              deleteTransaction={deleteTransaction} 
+              onEdit={(t) => setEditingTransaction(t)}
+          />
         </div>
-        <CustomerSection
-            customers={customers}
-            addCustomer={addCustomer}
-            deleteCustomer={deleteCustomer}
-            onEdit={(c) => setEditingCustomer(c)}
-            onConfirmPayment={(c) => setConfirmingPaymentCustomer(c)}
-        />
       </main>
       
       {editingTransaction && (
