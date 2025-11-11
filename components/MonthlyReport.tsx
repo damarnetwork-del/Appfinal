@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 // FIX: Added file extension to import statement
 import { Transaction, TransactionType } from '../types.ts';
 import Card from './Card';
@@ -25,21 +25,53 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
     return { totalIncome: income, totalExpense: expense, balance: income - expense };
   }, [transactions]);
 
-  const [animate, setAnimate] = useState(false);
+  const formatCurrency = (amount: number, compact = false) => {
+    if (compact) {
+        if (amount >= 1e6) {
+            return `${(amount / 1e6).toFixed(1)} Jt`;
+        }
+        if (amount >= 1e3) {
+            return `${(amount / 1e3).toFixed(0)} Rb`;
+        }
+    }
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimate(true);
-    }, 100); // Trigger animation shortly after mount
-    return () => clearTimeout(timer);
-  }, []);
+  const chartData = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const dailyData = Array.from({ length: daysInMonth }, (_, i) => ({
+      day: i + 1,
+      income: 0,
+      expense: 0,
+    }));
+
+    const currentMonthTransactions = transactions.filter(t => {
+      const tDate = new Date(t.date);
+      return tDate.getFullYear() === year && tDate.getMonth() === month;
+    });
+
+    currentMonthTransactions.forEach(t => {
+      const dayOfMonth = new Date(t.date).getDate();
+      const dayIndex = dayOfMonth - 1;
+      if (t.type === TransactionType.INCOME) {
+        dailyData[dayIndex].income += t.amount;
+      } else {
+        dailyData[dayIndex].expense += t.amount;
+      }
+    });
+
+    const maxAmount = Math.max(1, ...dailyData.map(d => d.income), ...dailyData.map(d => d.expense));
+    
+    return { dailyData, maxAmount, daysInMonth };
+  }, [transactions]);
+
 
   const members = ['Mardi', 'Daden', 'Hamdan', 'Umi'];
   const profitShare = balance > 0 ? balance / members.length : 0;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-  };
 
   const handleExportPDF = () => {
     const { jsPDF } = window.jspdf;
@@ -130,12 +162,45 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
     doc.save(`Laporan_Keuangan_${reportMonth.replace(' ', '_')}.pdf`);
   };
   
-  const maxAmount = Math.max(totalIncome, totalExpense, 1);
-  const incomeHeightPercent = (totalIncome / maxAmount) * 100;
-  const expenseHeightPercent = (totalExpense / maxAmount) * 100;
-  
-  const finalIncomeHeight = animate ? incomeHeightPercent : 0;
-  const finalExpenseHeight = animate ? expenseHeightPercent : 0;
+  // SVG Chart constants
+  const width = 500;
+  const height = 250;
+  const padding = { top: 20, right: 20, bottom: 40, left: 60 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const getCoords = (day: number, amount: number) => {
+    const x = padding.left + ((day - 1) / (chartData.daysInMonth - 1)) * chartWidth;
+    const y = padding.top + chartHeight - (amount / chartData.maxAmount) * chartHeight;
+    return { x, y };
+  };
+
+  const incomePath = chartData.dailyData
+    .map((d) => {
+      const { x, y } = getCoords(d.day, d.income);
+      return `${d.day === 1 ? 'M' : 'L'}${x},${y}`;
+    })
+    .join(' ');
+
+  const expensePath = chartData.dailyData
+    .map((d) => {
+      const { x, y } = getCoords(d.day, d.expense);
+      return `${d.day === 1 ? 'M' : 'L'}${x},${y}`;
+    })
+    .join(' ');
+
+  const yAxisLabels = [0, chartData.maxAmount / 2, chartData.maxAmount].map(val => ({
+    value: val,
+    y: getCoords(1, val).y,
+  }));
+
+  const xAxisLabels = chartData.dailyData
+    .filter(d => d.day === 1 || d.day % 5 === 0)
+    .map(d => ({
+        value: d.day,
+        x: getCoords(d.day, 0).x,
+    }));
+
 
   return (
     <section>
@@ -143,28 +208,58 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
       <Card>
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-slate-700 mb-3">Visualisasi Bulanan</h3>
-            <div className="h-48 p-4 bg-slate-50 rounded-lg flex justify-around items-end gap-4 border border-slate-200">
-              {/* Income Bar */}
-              <div className="flex flex-col items-center w-1/3 h-full justify-end">
-                <p className="text-xs font-semibold text-green-600">{formatCurrency(totalIncome)}</p>
-                <div 
-                  className="w-10 bg-green-400 rounded-t-md mt-1 transition-[height] duration-700 ease-out"
-                  style={{ height: `${finalIncomeHeight}%` }}
-                  title={`Pemasukan: ${formatCurrency(totalIncome)}`}
-                ></div>
-                <p className="text-xs font-medium text-slate-600 mt-2">Pemasukan</p>
-              </div>
-              {/* Expense Bar */}
-              <div className="flex flex-col items-center w-1/3 h-full justify-end">
-                <p className="text-xs font-semibold text-red-600">{formatCurrency(totalExpense)}</p>
-                <div 
-                  className="w-10 bg-red-400 rounded-t-md mt-1 transition-[height] duration-700 ease-out delay-200"
-                  style={{ height: `${finalExpenseHeight}%` }}
-                  title={`Pengeluaran: ${formatCurrency(totalExpense)}`}
-                ></div>
-                <p className="text-xs font-medium text-slate-600 mt-2">Pengeluaran</p>
-              </div>
+            <h3 className="text-lg font-semibold text-slate-700 mb-3">Grafik Tren Bulanan</h3>
+            <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 relative">
+                {transactions.length > 0 ? (
+                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+                        {/* Y-Axis Gridlines and Labels */}
+                        {yAxisLabels.map(({ value, y }) => (
+                            <g key={`y-axis-${value}`} className="text-slate-400">
+                                <line x1={padding.left} x2={width - padding.right} y1={y} y2={y} stroke="currentColor" strokeDasharray="2,3" strokeWidth="0.5" />
+                                <text x={padding.left - 8} y={y + 3} textAnchor="end" className="text-xs fill-current">{formatCurrency(value, true)}</text>
+                            </g>
+                        ))}
+                        {/* X-Axis Labels */}
+                        {xAxisLabels.map(({ value, x }) => (
+                             <g key={`x-axis-${value}`} className="text-slate-400">
+                                <text x={x} y={height - padding.bottom + 15} textAnchor="middle" className="text-xs fill-current">{value}</text>
+                            </g>
+                        ))}
+                         <text x={width/2} y={height - 5} textAnchor="middle" className="text-xs font-semibold fill-slate-600">Hari dalam Bulan Ini</text>
+
+                        {/* Data Lines */}
+                        <path d={incomePath} fill="none" stroke="#34d399" strokeWidth="2" />
+                        <path d={expensePath} fill="none" stroke="#f87171" strokeWidth="2" />
+                        
+                        {/* Data Points and Tooltips */}
+                        {chartData.dailyData.map((d) => {
+                            const incomeCoords = getCoords(d.day, d.income);
+                            const expenseCoords = getCoords(d.day, d.expense);
+                            return (
+                                <g key={`day-${d.day}-points`}>
+                                    {d.income > 0 && <circle cx={incomeCoords.x} cy={incomeCoords.y} r="3" fill="#34d399" stroke="white" strokeWidth="1">
+                                        <title>{`Hari ${d.day} (Pemasukan): ${formatCurrency(d.income)}`}</title>
+                                    </circle>}
+                                    {d.expense > 0 && <circle cx={expenseCoords.x} cy={expenseCoords.y} r="3" fill="#f87171" stroke="white" strokeWidth="1">
+                                        <title>{`Hari ${d.day} (Pengeluaran): ${formatCurrency(d.expense)}`}</title>
+                                    </circle>}
+                                </g>
+                            )
+                        })}
+                    </svg>
+                ) : (
+                    <p className="text-center text-slate-500 h-48 flex items-center justify-center">Data transaksi tidak cukup untuk menampilkan grafik.</p>
+                )}
+                 <div className="flex justify-center items-center space-x-4 mt-2 text-xs">
+                    <div className="flex items-center">
+                        <span className="w-3 h-3 bg-emerald-400 rounded-full mr-1.5"></span>
+                        <span>Pemasukan</span>
+                    </div>
+                    <div className="flex items-center">
+                        <span className="w-3 h-3 bg-red-400 rounded-full mr-1.5"></span>
+                        <span>Pengeluaran</span>
+                    </div>
+                </div>
             </div>
           </div>
           
