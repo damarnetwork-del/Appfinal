@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Customer, SubscriptionType } from '../types';
+// FIX: Added file extension to import statement
+import { Customer, SubscriptionType } from '../types.ts';
 
 interface EditCustomerModalProps {
   isOpen: boolean;
@@ -63,7 +64,8 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({ isOpen, onClose, 
           <div>
             <label htmlFor="edit-subscription-type" className="block text-sm font-medium text-slate-700">Jenis Langganan</label>
             <select id="edit-subscription-type" value={subscriptionType} onChange={(e) => setSubscriptionType(e.target.value as SubscriptionType)} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
-              {Object.values(SubscriptionType).map(type => (
+              {/* FIX: Explicitly cast enum values to an array of SubscriptionType to fix mapping error. */}
+              {(Object.values(SubscriptionType) as SubscriptionType[]).map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
