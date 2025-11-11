@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 // FIX: Added file extension to import statement
 import { Transaction, TransactionType } from '../types.ts';
 import Card from './Card';
@@ -10,18 +10,36 @@ interface TransactionListProps {
 }
 
 const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteTransaction, onEdit }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
   };
   
-  const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const filteredAndSortedTransactions = useMemo(() => {
+    return transactions
+      .filter(t => 
+        t.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [transactions, searchTerm]);
 
   return (
     <section>
       <h2 className="text-2xl font-bold text-slate-800 mb-4">Riwayat Transaksi</h2>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Cari berdasarkan deskripsi..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          aria-label="Cari transaksi"
+        />
+      </div>
       <Card>
         <div className="overflow-x-auto">
-          {sortedTransactions.length > 0 ? (
+          {filteredAndSortedTransactions.length > 0 ? (
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50">
                 <tr>
@@ -35,7 +53,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteT
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {sortedTransactions.map((t) => (
+                {filteredAndSortedTransactions.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{new Date(t.date).toLocaleDateString('id-ID')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{t.description}</td>
@@ -52,7 +70,9 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteT
               </tbody>
             </table>
           ) : (
-            <p className="text-center text-slate-500 py-8">Belum ada transaksi.</p>
+            <p className="text-center text-slate-500 py-8">
+              {searchTerm ? 'Tidak ada transaksi yang cocok dengan pencarian.' : 'Belum ada transaksi.'}
+            </p>
           )}
         </div>
       </Card>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -32,11 +33,10 @@ function App() {
   };
 
   // Transaction handlers
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {
+  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: uuidv4(),
-      date: new Date().toISOString(),
     };
     setTransactions(prev => [...prev, newTransaction]);
   };
@@ -90,6 +90,7 @@ function App() {
             amount,
             type: TransactionType.INCOME,
             method: TransactionMethod.TRANSFER, // Assuming transfer, could be made selectable
+            date: new Date().toISOString(),
         });
     }
 

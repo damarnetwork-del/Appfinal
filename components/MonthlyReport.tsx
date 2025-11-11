@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+
+import React, { useMemo, useState, useEffect } from 'react';
 // FIX: Added file extension to import statement
 import { Transaction, TransactionType } from '../types.ts';
 import Card from './Card';
@@ -23,6 +24,15 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
     });
     return { totalIncome: income, totalExpense: expense, balance: income - expense };
   }, [transactions]);
+
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimate(true);
+    }, 100); // Trigger animation shortly after mount
+    return () => clearTimeout(timer);
+  }, []);
 
   const members = ['Mardi', 'Daden', 'Hamdan', 'Umi'];
   const profitShare = balance > 0 ? balance / members.length : 0;
@@ -119,13 +129,46 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
 
     doc.save(`Laporan_Keuangan_${reportMonth.replace(' ', '_')}.pdf`);
   };
+  
+  const maxAmount = Math.max(totalIncome, totalExpense, 1);
+  const incomeHeightPercent = (totalIncome / maxAmount) * 100;
+  const expenseHeightPercent = (totalExpense / maxAmount) * 100;
+  
+  const finalIncomeHeight = animate ? incomeHeightPercent : 0;
+  const finalExpenseHeight = animate ? expenseHeightPercent : 0;
 
   return (
     <section>
       <h2 className="text-2xl font-bold text-slate-800 mb-4">Laporan Bulanan & Bagi Hasil</h2>
       <Card>
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
+            <h3 className="text-lg font-semibold text-slate-700 mb-3">Visualisasi Bulanan</h3>
+            <div className="h-48 p-4 bg-slate-50 rounded-lg flex justify-around items-end gap-4 border border-slate-200">
+              {/* Income Bar */}
+              <div className="flex flex-col items-center w-1/3 h-full justify-end">
+                <p className="text-xs font-semibold text-green-600">{formatCurrency(totalIncome)}</p>
+                <div 
+                  className="w-10 bg-green-400 rounded-t-md mt-1 transition-[height] duration-700 ease-out"
+                  style={{ height: `${finalIncomeHeight}%` }}
+                  title={`Pemasukan: ${formatCurrency(totalIncome)}`}
+                ></div>
+                <p className="text-xs font-medium text-slate-600 mt-2">Pemasukan</p>
+              </div>
+              {/* Expense Bar */}
+              <div className="flex flex-col items-center w-1/3 h-full justify-end">
+                <p className="text-xs font-semibold text-red-600">{formatCurrency(totalExpense)}</p>
+                <div 
+                  className="w-10 bg-red-400 rounded-t-md mt-1 transition-[height] duration-700 ease-out delay-200"
+                  style={{ height: `${finalExpenseHeight}%` }}
+                  title={`Pengeluaran: ${formatCurrency(totalExpense)}`}
+                ></div>
+                <p className="text-xs font-medium text-slate-600 mt-2">Pengeluaran</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-slate-200 pt-4">
             <h3 className="text-lg font-semibold text-slate-700">Perhitungan Bagi Hasil</h3>
             <p className="text-sm text-slate-500">Berdasarkan total saldo saat ini: <span className="font-bold">{formatCurrency(balance)}</span></p>
           </div>

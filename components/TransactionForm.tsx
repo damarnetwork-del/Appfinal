@@ -1,37 +1,39 @@
 
-
 import React, { useState } from 'react';
 // FIX: Added file extension to import statement
 import { Transaction, TransactionType, TransactionMethod } from '../types.ts';
 import Card from './Card';
 
 interface TransactionFormProps {
-  addTransaction: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
+  addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
   const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
   const [method, setMethod] = useState<TransactionMethod>(TransactionMethod.TRANSFER);
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim() || !amount.trim() || parseFloat(amount) <= 0) {
-      setError('Deskripsi dan jumlah harus diisi dengan benar.');
+    if (!description.trim() || !amount.trim() || parseFloat(amount) <= 0 || !date) {
+      setError('Deskripsi, jumlah, dan tanggal harus diisi dengan benar.');
       return;
     }
 
     addTransaction({
       description,
       amount: parseFloat(amount),
+      date: new Date(date + 'T00:00:00').toISOString(), // Ensure date is local
       type,
       method,
     });
 
     setDescription('');
     setAmount('');
+    setDate(new Date().toISOString().split('T')[0]);
     setError('');
   };
 
@@ -48,6 +50,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ addTransaction }) => 
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Contoh: Gaji bulanan"
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+            </div>
+            <div>
+                <label htmlFor="date" className="block text-sm font-medium text-slate-700">Tanggal</label>
+                <input
+                    type="date"
+                    id="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
                     className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
             </div>
