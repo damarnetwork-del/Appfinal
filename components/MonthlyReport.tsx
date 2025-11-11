@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { Transaction, TransactionType } from '../types';
+// FIX: Added file extension to import statement
+import { Transaction, TransactionType } from '../types.ts';
 import Card from './Card';
 
 // Declare jspdf global from CDN
