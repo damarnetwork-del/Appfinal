@@ -27,14 +27,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteT
 
   return (
     <section>
-      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Riwayat Transaksi</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Riwayat Transaksi</h2>
       <div className="mb-4">
         <input
           type="text"
           placeholder="Cari berdasarkan deskripsi..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           aria-label="Cari transaksi"
         />
       </div>
@@ -42,36 +42,36 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteT
         <div className="overflow-x-auto">
           {filteredAndSortedTransactions.length > 0 ? (
             <table className="min-w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Deskripsi</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jumlah</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Metode</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
                   <th scope="col" className="relative px-6 py-3">
                     <span className="sr-only">Aksi</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800">
+              <tbody className="bg-white">
                 {filteredAndSortedTransactions.map((t, index) => (
-                  <tr key={t.id} className={index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-800/50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(t.date).toLocaleDateString('id-ID')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{t.description}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${t.type === TransactionType.INCOME ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <tr key={t.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(t.date).toLocaleDateString('id-ID')}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{t.description}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${t.type === TransactionType.INCOME ? 'text-green-600' : 'text-red-600'}`}>
                       {t.type === TransactionType.EXPENSE && '- '}{formatCurrency(t.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{t.method === 'CASH' ? 'Tunai' : 'Transfer'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{t.method === 'CASH' ? 'Tunai' : 'Transfer'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                      <button onClick={() => onEdit(t)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Edit</button>
-                      <button onClick={() => deleteTransaction(t.id)} className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">Hapus</button>
+                      <button onClick={() => onEdit(t)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+                      <button onClick={() => deleteTransaction(t.id)} className="text-red-600 hover:text-red-800 font-medium">Hapus</button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            <p className="text-center text-gray-500 py-8">
               {searchTerm ? 'Tidak ada transaksi yang cocok dengan pencarian.' : 'Belum ada transaksi.'}
             </p>
           )}

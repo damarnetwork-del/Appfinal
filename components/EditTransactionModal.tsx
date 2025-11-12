@@ -51,32 +51,32 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-2xl font-bold">&times;</button>
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Edit Transaksi</h2>
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Edit Transaksi</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-              <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi</label>
+              <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700">Deskripsi</label>
               <input
                   type="text"
                   id="edit-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
           </div>
           <div>
-              <label htmlFor="edit-amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Jumlah (Rp)</label>
+              <label htmlFor="edit-amount" className="block text-sm font-medium text-gray-700">Jumlah (Rp)</label>
               <input
                   type="number"
                   id="edit-amount"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
           </div>
           <fieldset>
-              <legend className="text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Transaksi</legend>
+              <legend className="text-sm font-medium text-gray-700">Jenis Transaksi</legend>
               <div className="mt-2 flex items-center space-x-6">
                   <div className="flex items-center">
                       <input
@@ -85,9 +85,9 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
                           type="radio"
                           checked={type === TransactionType.INCOME}
                           onChange={() => setType(TransactionType.INCOME)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
+                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label htmlFor="edit-income" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                      <label htmlFor="edit-income" className="ml-2 block text-sm text-gray-900">
                           Pemasukan
                       </label>
                   </div>
@@ -98,16 +98,16 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
                           type="radio"
                           checked={type === TransactionType.EXPENSE}
                           onChange={() => setType(TransactionType.EXPENSE)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
+                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label htmlFor="edit-expense" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                      <label htmlFor="edit-expense" className="ml-2 block text-sm text-gray-900">
                           Pengeluaran
                       </label>
                   </div>
               </div>
           </fieldset>
           <fieldset>
-              <legend className="text-sm font-medium text-gray-700 dark:text-gray-300">Metode Transaksi</legend>
+              <legend className="text-sm font-medium text-gray-700">Metode Transaksi</legend>
               <div className="mt-2 flex items-center space-x-6">
                   <div className="flex items-center">
                       <input
@@ -116,9 +116,9 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
                           type="radio"
                           checked={method === TransactionMethod.TRANSFER}
                           onChange={() => setMethod(TransactionMethod.TRANSFER)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
+                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label htmlFor="edit-transfer" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                      <label htmlFor="edit-transfer" className="ml-2 block text-sm text-gray-900">
                           Transfer
                       </label>
                   </div>
@@ -129,9 +129,9 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
                           type="radio"
                           checked={method === TransactionMethod.CASH}
                           onChange={() => setMethod(TransactionMethod.CASH)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500"
+                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label htmlFor="edit-cash" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                      <label htmlFor="edit-cash" className="ml-2 block text-sm text-gray-900">
                           Tunai
                       </label>
                   </div>
@@ -142,7 +142,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
             <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-500 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
                 Batal
             </button>

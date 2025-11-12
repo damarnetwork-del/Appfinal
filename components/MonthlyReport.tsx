@@ -204,28 +204,28 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
 
   return (
     <section>
-      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Laporan & Bagi Hasil</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Laporan & Bagi Hasil</h2>
       <Card>
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Grafik Tren Bulanan</h3>
-            <div className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700 relative">
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Grafik Tren Bulanan</h3>
+            <div className="p-2 bg-gray-50 rounded-lg border border-gray-200 relative">
                 {transactions.length > 0 ? (
                     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
                         {/* Y-Axis Gridlines and Labels */}
                         {yAxisLabels.map(({ value, y }) => (
-                            <g key={`y-axis-${value}`} className="text-gray-400 dark:text-gray-500">
+                            <g key={`y-axis-${value}`} className="text-gray-400">
                                 <line x1={padding.left} x2={width - padding.right} y1={y} y2={y} stroke="currentColor" strokeDasharray="2,3" strokeWidth="0.5" />
                                 <text x={padding.left - 8} y={y + 3} textAnchor="end" className="text-xs fill-current">{formatCurrency(value, true)}</text>
                             </g>
                         ))}
                         {/* X-Axis Labels */}
                         {xAxisLabels.map(({ value, x }) => (
-                             <g key={`x-axis-${value}`} className="text-gray-400 dark:text-gray-500">
+                             <g key={`x-axis-${value}`} className="text-gray-400">
                                 <text x={x} y={height - padding.bottom + 15} textAnchor="middle" className="text-xs fill-current">{value}</text>
                             </g>
                         ))}
-                         <text x={width/2} y={height - 5} textAnchor="middle" className="text-xs font-semibold fill-gray-600 dark:fill-gray-400">Hari dalam Bulan Ini</text>
+                         <text x={width/2} y={height - 5} textAnchor="middle" className="text-xs font-semibold fill-gray-600">Hari dalam Bulan Ini</text>
 
                         {/* Data Lines */}
                         <path d={incomePath} fill="none" stroke="#10b981" strokeWidth="2" />
@@ -248,9 +248,9 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
                         })}
                     </svg>
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 h-48 flex items-center justify-center">Data transaksi tidak cukup untuk menampilkan grafik.</p>
+                    <p className="text-center text-gray-500 h-48 flex items-center justify-center">Data transaksi tidak cukup untuk menampilkan grafik.</p>
                 )}
-                 <div className="flex justify-center items-center space-x-4 mt-2 text-xs text-gray-600 dark:text-gray-300">
+                 <div className="flex justify-center items-center space-x-4 mt-2 text-xs text-gray-600">
                     <div className="flex items-center">
                         <span className="w-3 h-3 bg-green-500 rounded-full mr-1.5"></span>
                         <span>Pemasukan</span>
@@ -263,27 +263,27 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
             </div>
           </div>
           
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Perhitungan Bagi Hasil</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Berdasarkan total saldo saat ini: <span className="font-bold">{formatCurrency(balance)}</span></p>
+          <div className="border-t border-gray-200 pt-4">
+            <h3 className="text-lg font-semibold text-gray-700">Perhitungan Bagi Hasil</h3>
+            <p className="text-sm text-gray-500">Berdasarkan total saldo saat ini: <span className="font-bold">{formatCurrency(balance)}</span></p>
           </div>
           {balance > 0 ? (
             <ul className="space-y-2">
               {members.map(member => (
-                <li key={member} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg flex justify-between items-center">
-                  <span className="text-gray-800 dark:text-gray-200 font-medium">{member}</span>
-                  <span className="text-green-600 dark:text-green-400 font-semibold">{formatCurrency(profitShare)}</span>
+                <li key={member} className="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                  <span className="text-gray-800 font-medium">{member}</span>
+                  <span className="text-green-600 font-semibold">{formatCurrency(profitShare)}</span>
                 </li>
               ))}
             </ul>
           ) : (
-             <p className="text-gray-500 dark:text-gray-400 text-center py-4">Saldo tidak mencukupi untuk bagi hasil.</p>
+             <p className="text-gray-500 text-center py-4">Saldo tidak mencukupi untuk bagi hasil.</p>
           )}
 
           <button
             onClick={handleExportPDF}
             disabled={transactions.length === 0}
-            className="w-full inline-flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="w-full inline-flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             Ekspor Laporan PDF
           </button>

@@ -15,18 +15,6 @@ import EditCustomerModal from './components/EditCustomerModal';
 import PaymentConfirmationModal from './components/PaymentConfirmationModal';
 import SettingsModal from './components/SettingsModal';
 
-const MoonIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-    </svg>
-);
-
-const SunIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 18a1 1 0 01-1-1v-1a1 1 0 112 0v1a1 1 0 01-1 1zM3.05 4.536a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zM16.95 15.464a1 1 0 01-1.414 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1z" clipRule="evenodd" />
-    </svg>
-);
-
 const SettingsIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -38,7 +26,6 @@ function App() {
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('transactions', []);
   const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', []);
   const [isLoggedIn, setIsLoggedIn] = useLocalStorage('isLoggedIn', false);
-  const [theme, setTheme] = useLocalStorage('theme', 'light');
   const [telegramSettings, setTelegramSettings] = useLocalStorage<TelegramSettings>('telegramSettings', {
     enabled: false,
     botToken: '',
@@ -51,15 +38,6 @@ function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   const logoutTimer = useRef<number | null>(null);
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [theme]);
 
   const handleLogout = () => {
     if (logoutTimer.current) {
@@ -100,11 +78,6 @@ function App() {
       };
     }
   }, [isLoggedIn]);
-
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
@@ -234,28 +207,21 @@ function App() {
   }
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300">
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+    <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-white">Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
             <div className="flex items-center space-x-4">
                  <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-blue-500"
-                    aria-label="Toggle theme"
-                 >
-                    {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-                </button>
-                 <button
                     onClick={() => setIsSettingsModalOpen(true)}
-                    className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-blue-500"
+                    className="p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-500"
                     aria-label="Pengaturan Aplikasi"
                  >
                     <SettingsIcon />
                 </button>
                 <button
                     onClick={handleLogout}
-                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-blue-500 rounded-md px-3 py-1"
+                    className="text-sm font-medium text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-500 rounded-md px-3 py-1"
                 >
                     Logout
                 </button>

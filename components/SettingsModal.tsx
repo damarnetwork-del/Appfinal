@@ -13,10 +13,10 @@ const ToggleSwitch: React.FC<{ enabled: boolean; onChange: (enabled: boolean) =>
         <label htmlFor="telegram-toggle" className="flex items-center cursor-pointer">
             <div className="relative">
                 <input id="telegram-toggle" type="checkbox" className="sr-only" checked={enabled} onChange={(e) => onChange(e.target.checked)} />
-                <div className="block bg-gray-200 dark:bg-gray-600 w-14 h-8 rounded-full"></div>
+                <div className="block bg-gray-200 w-14 h-8 rounded-full"></div>
                 <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${enabled ? 'transform translate-x-full bg-blue-500' : ''}`}></div>
             </div>
-            <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+            <div className="ml-3 text-gray-700 font-medium">
                 {label}
             </div>
         </label>
@@ -51,9 +51,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-2xl font-bold">&times;</button>
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">Pengaturan Notifikasi Telegram</h2>
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
+        <h2 className="text-xl font-bold text-gray-800 mb-6">Pengaturan Notifikasi Telegram</h2>
         <div className="space-y-6">
             <ToggleSwitch 
                 label="Aktifkan Notifikasi"
@@ -63,7 +63,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
             {localSettings.enabled && (
                 <>
                     <div>
-                        <label htmlFor="botToken" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="botToken" className="block text-sm font-medium text-gray-700 mb-1">
                             Telegram Bot Token
                         </label>
                         <input
@@ -73,11 +73,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                             value={localSettings.botToken}
                             onChange={handleInputChange}
                             placeholder="Contoh: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-                            className="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white sm:text-sm"
+                            className="block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 sm:text-sm"
                         />
                     </div>
                      <div>
-                        <label htmlFor="chatId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="chatId" className="block text-sm font-medium text-gray-700 mb-1">
                             Telegram Chat ID
                         </label>
                         <input
@@ -87,7 +87,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                             value={localSettings.chatId}
                             onChange={handleInputChange}
                             placeholder="Contoh: -1001234567890 atau 123456789"
-                            className="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white sm:text-sm"
+                            className="block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 sm:text-sm"
                         />
                     </div>
                 </>
@@ -96,7 +96,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
               <button
                   type="button"
                   onClick={onClose}
-                  className="inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-500 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
               >
                   Batal
               </button>
