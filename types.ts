@@ -40,3 +40,10 @@ export interface Customer {
     amount: number;
     paymentHistory: PaymentRecord[];
 }
+
+// Added TelegramSettings interface for notification configuration
+export interface TelegramSettings {
+  enabled: boolean;
+  botToken: string;
+  chatId: string;
+}

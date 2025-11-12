@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord } from './types';
+import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord, TelegramSettings } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 
 import LoginPage from './components/LoginPage';
@@ -14,6 +13,7 @@ import CustomerSection from './components/CustomerSection';
 import EditTransactionModal from './components/EditTransactionModal';
 import EditCustomerModal from './components/EditCustomerModal';
 import PaymentConfirmationModal from './components/PaymentConfirmationModal';
+import SettingsModal from './components/SettingsModal';
 
 const MoonIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -27,16 +27,28 @@ const SunIcon = () => (
     </svg>
 );
 
+const SettingsIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+    </svg>
+);
+
 
 function App() {
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('transactions', []);
   const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', []);
   const [isLoggedIn, setIsLoggedIn] = useLocalStorage('isLoggedIn', false);
   const [theme, setTheme] = useLocalStorage('theme', 'light');
+  const [telegramSettings, setTelegramSettings] = useLocalStorage<TelegramSettings>('telegramSettings', {
+    enabled: false,
+    botToken: '',
+    chatId: '',
+  });
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [confirmingPaymentCustomer, setConfirmingPaymentCustomer] = useState<Customer | null>(null);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   const logoutTimer = useRef<number | null>(null);
 
@@ -98,13 +110,66 @@ function App() {
     setIsLoggedIn(true);
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
+
+  const sendTelegramNotification = async (newTransaction: Transaction, allTransactions: Transaction[]) => {
+      const { enabled, botToken, chatId } = telegramSettings;
+      if (!enabled || !botToken || !chatId) return;
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      allTransactions.forEach(t => {
+          if (t.type === TransactionType.INCOME) totalIncome += t.amount;
+          else totalExpense += t.amount;
+      });
+
+      const balance = totalIncome - totalExpense;
+
+      const message = [
+          `*Transaksi Baru*`,
+          `--------------------------------------`,
+          `- *Jenis Transaksi:* ${newTransaction.type === TransactionType.INCOME ? 'Pemasukan' : 'Pengeluaran'}`,
+          `- *Deskripsi:* ${newTransaction.description}`,
+          `- *Nominal:* ${formatCurrency(newTransaction.amount)}`,
+          `--------------------------------------`,
+          `*Ringkasan Keuangan Saat Ini:*`,
+          `- *Total Pemasukan:* ${formatCurrency(totalIncome)}`,
+          `- *Total Pengeluaran:* ${formatCurrency(totalExpense)}`,
+          `- *Saldo Total:* ${formatCurrency(balance)}`
+      ].join('\n');
+
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+      try {
+          await fetch(url, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  chat_id: chatId,
+                  text: message,
+                  parse_mode: 'Markdown',
+              }),
+          });
+      } catch (error) {
+          console.error("Failed to send Telegram notification:", error);
+      }
+  };
+
+
   // Transaction handlers
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: uuidv4(),
     };
-    setTransactions(prev => [...prev, newTransaction]);
+    const updatedTransactions = [...transactions, newTransaction];
+    setTransactions(updatedTransactions);
+    sendTelegramNotification(newTransaction, updatedTransactions);
   };
 
   const deleteTransaction = (id: string) => {
@@ -181,6 +246,13 @@ function App() {
                  >
                     {theme === 'light' ? <MoonIcon /> : <SunIcon />}
                 </button>
+                 <button
+                    onClick={() => setIsSettingsModalOpen(true)}
+                    className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-blue-500"
+                    aria-label="Pengaturan Aplikasi"
+                 >
+                    <SettingsIcon />
+                </button>
                 <button
                     onClick={handleLogout}
                     className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-blue-500 rounded-md px-3 py-1"
@@ -240,6 +312,13 @@ function App() {
           onConfirm={confirmPayment}
         />
       )}
+      
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        settings={telegramSettings}
+        onSave={setTelegramSettings}
+      />
 
     </div>
   );
