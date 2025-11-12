@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 // FIX: Added file extension to import statement
 import { Transaction, TransactionType } from '../types.ts';
@@ -12,6 +11,8 @@ interface TransactionListProps {
 
 const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteTransaction, onEdit }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -19,24 +20,58 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteT
   
   const filteredAndSortedTransactions = useMemo(() => {
     return transactions
-      .filter(t => 
-        t.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      .filter(t => {
+        const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Date strings are in 'YYYY-MM-DD...' format, so direct string comparison works
+        const transactionDateStr = t.date.split('T')[0];
+        const matchesDate = 
+            (!startDate || transactionDateStr >= startDate) &&
+            (!endDate || transactionDateStr <= endDate);
+
+        return matchesSearch && matchesDate;
+      })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [transactions, searchTerm]);
+  }, [transactions, searchTerm, startDate, endDate]);
 
   return (
     <section>
       <h2 className="text-xl font-bold text-gray-800 mb-4">Riwayat Transaksi</h2>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Cari berdasarkan deskripsi..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          aria-label="Cari transaksi"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 items-end">
+        <div className="md:col-span-1">
+            <label htmlFor="search-description" className="block text-sm font-medium text-gray-700 mb-1">Cari Deskripsi</label>
+            <input
+                id="search-description"
+                type="text"
+                placeholder="Cari..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                aria-label="Cari transaksi"
+            />
+        </div>
+        <div className="md:col-span-1">
+            <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">Dari Tanggal</label>
+            <input
+                id="start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                aria-label="Tanggal mulai"
+            />
+        </div>
+        <div className="md:col-span-1">
+            <label htmlFor="end-date" className="block text-sm font-medium text-gray-700 mb-1">Sampai Tanggal</label>
+            <input
+                id="end-date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                aria-label="Tanggal akhir"
+            />
+        </div>
       </div>
       <Card className="overflow-hidden p-0 sm:p-0">
         <div className="overflow-x-auto">
@@ -72,7 +107,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, deleteT
             </table>
           ) : (
             <p className="text-center text-gray-500 py-8">
-              {searchTerm ? 'Tidak ada transaksi yang cocok dengan pencarian.' : 'Belum ada transaksi.'}
+              {searchTerm || startDate || endDate ? 'Tidak ada transaksi yang cocok dengan filter.' : 'Belum ada transaksi.'}
             </p>
           )}
         </div>

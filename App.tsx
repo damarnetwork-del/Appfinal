@@ -116,7 +116,7 @@ function App() {
     };
 
     updateBilling();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, customers]);
 
 
   const handleLoginSuccess = () => {
