@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Customer, SubscriptionType } from '../types';
 import Card from './Card';
 
@@ -16,6 +16,10 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
   const [subscriptionType, setSubscriptionType] = useState<SubscriptionType>(SubscriptionType.PPPOE);
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedType, setSelectedType] = useState('ALL');
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -40,6 +44,23 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
     }
     return { text: 'Belum Bayar', color: 'text-red-700', bgColor: 'bg-red-100' };
   };
+
+  const filteredCustomers = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+    const shouldFilter = term !== '' || selectedType !== 'ALL';
+
+    if (!shouldFilter) {
+      return []; // Don't show results if no search/filter is active
+    }
+
+    return customers.filter(c => {
+      const nameMatch = c.name.toLowerCase().includes(term);
+      const typeMatch = selectedType === 'ALL' || c.subscriptionType === selectedType;
+      return nameMatch && typeMatch;
+    });
+  }, [customers, searchTerm, selectedType]);
+
+  const isSearching = searchTerm.trim() !== '' || selectedType !== 'ALL';
 
   return (
     <section className="mt-8">
@@ -77,9 +98,30 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
           </Card>
         </div>
         <div className="lg:col-span-2">
-           <Card className="overflow-hidden p-0 sm:p-0">
+           <Card className="p-4 sm:p-6">
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
+                <input
+                    type="text"
+                    placeholder="Cari nama pelanggan..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-grow w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    aria-label="Cari Pelanggan"
+                />
+                <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="w-full md:w-auto px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    aria-label="Filter Jenis Langganan"
+                >
+                    <option value="ALL">Semua Jenis</option>
+                    {Object.values(SubscriptionType).map(type => (
+                        <option key={type} value={type}>{type}</option>
+                    ))}
+                </select>
+            </div>
             <div className="overflow-x-auto">
-              {customers.length > 0 ? (
+              {isSearching && filteredCustomers.length > 0 ? (
                 <table className="min-w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -92,7 +134,7 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {customers.map((c, index) => {
+                    {filteredCustomers.map((c, index) => {
                       const status = getStatus(c);
                       return (
                       <tr key={c.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -116,7 +158,9 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
                   </tbody>
                 </table>
               ) : (
-                <p className="text-center text-gray-500 py-8">Belum ada pelanggan.</p>
+                <p className="text-center text-gray-500 py-8">
+                  {isSearching ? 'Tidak ada pelanggan yang cocok.' : 'Silakan cari nama atau filter berdasarkan jenis langganan untuk melihat data.'}
+                </p>
               )}
             </div>
            </Card>
