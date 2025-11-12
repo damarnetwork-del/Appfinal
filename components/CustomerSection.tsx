@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Customer, SubscriptionType } from '../types';
 import Card from './Card';
 
 interface CustomerSectionProps {
   customers: Customer[];
-  addCustomer: (customer: Omit<Customer, 'id' | 'paymentHistory'>) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'paymentHistory' | 'dueAmount' | 'lastBilledMonth'>) => void;
   deleteCustomer: (id: string) => void;
   onEdit: (customer: Customer) => void;
   onConfirmPayment: (customer: Customer) => void;
@@ -36,17 +35,9 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
   };
 
   const getStatus = (customer: Customer) => {
-    if (customer.paymentHistory.length === 0) {
-      return { text: 'Belum Bayar', color: 'text-red-700', bgColor: 'bg-red-100' };
+    if (customer.dueAmount <= 0) {
+      return { text: 'Lunas', color: 'text-green-700', bgColor: 'bg-green-100' };
     }
-    const lastPayment = new Date(customer.paymentHistory[customer.paymentHistory.length - 1].date);
-    const today = new Date();
-    
-    // Check if payment was this month
-    if (lastPayment.getFullYear() === today.getFullYear() && lastPayment.getMonth() === today.getMonth()) {
-        return { text: 'Sudah Bayar', color: 'text-green-700', bgColor: 'bg-green-100' };
-    }
-    
     return { text: 'Belum Bayar', color: 'text-red-700', bgColor: 'bg-red-100' };
   };
 
@@ -75,7 +66,7 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
                 </select>
               </div>
               <div>
-                <label htmlFor="customer-amount" className="block text-sm font-medium text-gray-700">Nominal (Rp)</label>
+                <label htmlFor="customer-amount" className="block text-sm font-medium text-gray-700">Nominal Tagihan (Rp)</label>
                 <input type="number" id="customer-amount" value={amount} onChange={(e) => setAmount(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900"/>
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
@@ -94,8 +85,8 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. HP</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Langganan</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nominal</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tagihan Bulanan</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Tagihan</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="relative px-6 py-3"><span className="sr-only">Aksi</span></th>
                     </tr>
@@ -107,15 +98,15 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
                       <tr key={c.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{c.name}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{c.phone}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{c.subscriptionType}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCurrency(c.amount)}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${c.dueAmount > 0 ? 'text-red-600' : 'text-gray-900'}`}>{formatCurrency(c.dueAmount)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                            <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${status.bgColor} ${status.color}`}>
                                 {status.text}
                            </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                          <button onClick={() => onConfirmPayment(c)} className="text-green-600 hover:text-green-800 font-medium">Bayar</button>
+                          <button onClick={() => onConfirmPayment(c)} className="text-green-600 hover:text-green-800 font-medium" disabled={c.dueAmount <= 0}>Bayar</button>
                           <button onClick={() => onEdit(c)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
                           <button onClick={() => deleteCustomer(c.id)} className="text-red-600 hover:text-red-800 font-medium">Hapus</button>
                         </td>

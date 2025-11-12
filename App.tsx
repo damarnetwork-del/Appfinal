@@ -79,6 +79,46 @@ function App() {
     }
   }, [isLoggedIn]);
 
+  // Monthly billing logic
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const updateBilling = () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // 0-11
+        const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+        const updatedCustomers = customers.map(customer => {
+            if (!customer.lastBilledMonth) { // Handle legacy customers
+                return {
+                    ...customer,
+                    dueAmount: customer.dueAmount ?? customer.amount,
+                    lastBilledMonth: currentMonthStr,
+                };
+            }
+
+            const [lastBilledYear, lastBilledMonth] = customer.lastBilledMonth.split('-').map(Number);
+            const lastBilledDate = new Date(lastBilledYear, lastBilledMonth - 1); // Month is 0-indexed
+
+            let monthsToBill = (currentYear - lastBilledDate.getFullYear()) * 12 + (currentMonth - lastBilledDate.getMonth());
+            
+            if (monthsToBill > 0) {
+                const newDueAmount = (customer.dueAmount || 0) + (customer.amount * monthsToBill);
+                return { ...customer, dueAmount: newDueAmount, lastBilledMonth: currentMonthStr };
+            }
+            return customer;
+        });
+
+        if (JSON.stringify(updatedCustomers) !== JSON.stringify(customers)) {
+            setCustomers(updatedCustomers);
+        }
+    };
+
+    updateBilling();
+  }, [isLoggedIn]);
+
+
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
   };
@@ -157,11 +197,17 @@ function App() {
   };
 
   // Customer handlers
-  const addCustomer = (customer: Omit<Customer, 'id' | 'paymentHistory'>) => {
+  const addCustomer = (customer: Omit<Customer, 'id' | 'paymentHistory' | 'dueAmount' | 'lastBilledMonth'>) => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+    
     const newCustomer: Customer = {
       ...customer,
       id: uuidv4(),
       paymentHistory: [],
+      dueAmount: customer.amount, // First bill
+      lastBilledMonth: `${currentYear}-${currentMonth}`,
     };
     setCustomers(prev => [...prev, newCustomer]);
   };
@@ -177,23 +223,31 @@ function App() {
     setEditingCustomer(null);
   };
 
-  const confirmPayment = (customerId: string, amount: number) => {
+  const confirmPayment = (customerId: string, paymentAmount: number) => {
     const paymentRecord: PaymentRecord = {
       date: new Date().toISOString(),
-      amount,
+      amount: paymentAmount,
     };
     
-    // Add payment to customer's history
-    setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, paymentHistory: [...c.paymentHistory, paymentRecord] } : c));
+    // Update customer's due amount and payment history
+    setCustomers(prev => prev.map(c => 
+        c.id === customerId 
+        ? { 
+            ...c, 
+            paymentHistory: [...c.paymentHistory, paymentRecord],
+            dueAmount: c.dueAmount - paymentAmount
+          } 
+        : c
+    ));
     
     // Add transaction record
     const customer = customers.find(c => c.id === customerId);
     if (customer) {
         addTransaction({
-            description: `Pembayaran dari ${customer.name}`,
-            amount,
+            description: `Pembayaran tagihan dari ${customer.name}`,
+            amount: paymentAmount,
             type: TransactionType.INCOME,
-            method: TransactionMethod.TRANSFER, // Assuming transfer, could be made selectable
+            method: TransactionMethod.TRANSFER, // Assuming transfer
             date: new Date().toISOString(),
         });
     }

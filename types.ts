@@ -37,8 +37,10 @@ export interface Customer {
     name: string;
     phone: string;
     subscriptionType: SubscriptionType;
-    amount: number;
+    amount: number; // This is the monthly amount
     paymentHistory: PaymentRecord[];
+    dueAmount: number; // Total outstanding amount
+    lastBilledMonth: string; // Format "YYYY-MM"
 }
 
 // Added TelegramSettings interface for notification configuration
