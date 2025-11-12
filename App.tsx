@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord, TelegramSettings } from './types';
+import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord, TelegramSettings, CompanyProfile } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 
 import LoginPage from './components/LoginPage';
@@ -30,6 +30,13 @@ function App() {
     enabled: false,
     botToken: '',
     chatId: '',
+  });
+  const [companyProfile, setCompanyProfile] = useLocalStorage<CompanyProfile>('companyProfile', {
+    name: 'Damar Global Network',
+    address: 'Jl. Kemajuan No. 123, Jakarta Pusat, Indonesia',
+    contactPerson: 'Mardi Jayadi',
+    email: 'kontak@damarglobal.net',
+    logo: '',
   });
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -83,40 +90,47 @@ function App() {
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    const updateBilling = () => {
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth(); // 0-11
-        const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+    const checkAndBill = () => {
+        setCustomers(currentCustomers => {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth(); // 0-11
+            const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
 
-        const updatedCustomers = customers.map(customer => {
-            if (!customer.lastBilledMonth) { // Handle legacy customers
-                return {
-                    ...customer,
-                    dueAmount: customer.dueAmount ?? customer.amount,
-                    lastBilledMonth: currentMonthStr,
-                };
-            }
+            const updatedCustomers = currentCustomers.map(customer => {
+                if (!customer.lastBilledMonth) {
+                    return {
+                        ...customer,
+                        dueAmount: customer.dueAmount ?? customer.amount,
+                        lastBilledMonth: currentMonthStr,
+                    };
+                }
 
-            const [lastBilledYear, lastBilledMonth] = customer.lastBilledMonth.split('-').map(Number);
-            const lastBilledDate = new Date(lastBilledYear, lastBilledMonth - 1); // Month is 0-indexed
+                const [lastBilledYear, lastBilledMonthNum] = customer.lastBilledMonth.split('-').map(Number);
+                const lastBilledDate = new Date(lastBilledYear, lastBilledMonthNum - 1);
 
-            let monthsToBill = (currentYear - lastBilledDate.getFullYear()) * 12 + (currentMonth - lastBilledDate.getMonth());
+                const monthsToBill = (currentYear - lastBilledDate.getFullYear()) * 12 + (currentMonth - lastBilledDate.getMonth());
+                
+                if (monthsToBill > 0) {
+                    const newDueAmount = (customer.dueAmount || 0) + (customer.amount * monthsToBill);
+                    return { ...customer, dueAmount: newDueAmount, lastBilledMonth: currentMonthStr };
+                }
+                return customer;
+            });
             
-            if (monthsToBill > 0) {
-                const newDueAmount = (customer.dueAmount || 0) + (customer.amount * monthsToBill);
-                return { ...customer, dueAmount: newDueAmount, lastBilledMonth: currentMonthStr };
+            if (JSON.stringify(updatedCustomers) !== JSON.stringify(currentCustomers)) {
+                return updatedCustomers;
             }
-            return customer;
+            return currentCustomers;
         });
-
-        if (JSON.stringify(updatedCustomers) !== JSON.stringify(customers)) {
-            setCustomers(updatedCustomers);
-        }
     };
+    
+    checkAndBill(); // Initial check on login
+    const intervalId = setInterval(checkAndBill, 10 * 60 * 1000); // Periodic check every 10 minutes
 
-    updateBilling();
-  }, [isLoggedIn, customers]);
+    return () => clearInterval(intervalId); // Cleanup interval on logout/unmount
+
+  }, [isLoggedIn]);
 
 
   const handleLoginSuccess = () => {
@@ -287,7 +301,7 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-1 space-y-6">
              <TransactionForm addTransaction={addTransaction} />
-             <MonthlyReport transactions={transactions} />
+             <MonthlyReport transactions={transactions} companyProfile={companyProfile} />
           </div>
           <div className="lg:col-span-2">
             <TransactionList 
@@ -336,8 +350,14 @@ function App() {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        settings={telegramSettings}
-        onSave={setTelegramSettings}
+        telegramSettings={telegramSettings}
+        onSaveTelegram={setTelegramSettings}
+        companyProfile={companyProfile}
+        onSaveProfile={setCompanyProfile}
+        transactions={transactions}
+        customers={customers}
+        setTransactions={setTransactions}
+        setCustomers={setCustomers}
       />
 
     </div>

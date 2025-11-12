@@ -1,7 +1,6 @@
-
 import React, { useMemo } from 'react';
 // FIX: Added file extension to import statement
-import { Transaction, TransactionType } from '../types.ts';
+import { Transaction, TransactionType, CompanyProfile } from '../types.ts';
 import Card from './Card';
 
 // Declare jspdf global from CDN
@@ -11,7 +10,7 @@ declare global {
   }
 }
 
-const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions }) => {
+const MonthlyReport: React.FC<{ transactions: Transaction[], companyProfile: CompanyProfile }> = ({ transactions, companyProfile }) => {
   const { totalIncome, totalExpense, balance } = useMemo(() => {
     let income = 0;
     let expense = 0;
@@ -79,16 +78,21 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
     let y = 20;
 
     // 1. Kop Perusahaan (Letterhead)
+    if (companyProfile.logo) {
+      doc.addImage(companyProfile.logo, 'PNG', 15, 15, 25, 25);
+    }
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Damar Global Network', 105, y, { align: 'center' });
+    doc.text(companyProfile.name, 45, y);
     y += 7;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('Jl. Kemajuan No. 123, Jakarta Pusat, Indonesia', 105, y, { align: 'center' });
+    doc.text(companyProfile.address, 45, y);
+    y += 5;
+    doc.text(companyProfile.email, 45, y);
     y += 5;
     doc.setLineWidth(0.5);
-    doc.line(20, y, 190, y);
+    doc.line(15, y, 195, y);
     y += 10;
 
     // 2. Judul Laporan
@@ -98,10 +102,31 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
     doc.text(`Laporan Keuangan Bulanan - ${reportMonth}`, 105, y, { align: 'center' });
     y += 15;
 
-    // 3. Laporan Bagi Hasil
+    // 3. Ringkasan Keuangan
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('Laporan Bagi Hasil', 20, y);
+    doc.text('Ringkasan Keuangan', 15, y);
+    y += 7;
+    const summaryBody = [
+        ['Total Pemasukan', formatCurrency(totalIncome)],
+        ['Total Pengeluaran', formatCurrency(totalExpense)],
+        ['Saldo Akhir', formatCurrency(balance)],
+    ];
+    (doc as any).autoTable({
+        startY: y,
+        head: [['Deskripsi', 'Jumlah']],
+        body: summaryBody,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185] },
+        columnStyles: { 0: { fontStyle: 'bold' } },
+    });
+    y = (doc as any).lastAutoTable.finalY + 10;
+
+
+    // 4. Laporan Bagi Hasil
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Laporan Bagi Hasil', 15, y);
     y += 7;
     const shareBody = members.map(member => [member, formatCurrency(profitShare)]);
     (doc as any).autoTable({
@@ -113,10 +138,10 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
     });
     y = (doc as any).lastAutoTable.finalY + 10;
     
-    // 4. Riwayat Transaksi
+    // 5. Riwayat Transaksi
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('Rincian Riwayat Transaksi', 20, y);
+    doc.text('Rincian Riwayat Transaksi', 15, y);
     y += 7;
     const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const tableBody = sortedTransactions.map(t => [
@@ -145,19 +170,19 @@ const MonthlyReport: React.FC<{ transactions: Transaction[] }> = ({ transactions
       y = 20;
     }
 
-    // 5. Tanda Tangan
+    // 6. Tanda Tangan
     const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Jakarta, ${today}`, 190, y, { align: 'right' });
+    doc.text(`Jakarta, ${today}`, 195, y, { align: 'right' });
     y += 7;
-    doc.text('Hormat kami,', 190, y, { align: 'right' });
+    doc.text('Hormat kami,', 195, y, { align: 'right' });
     y += 30; // Space for signature
     doc.setFont('helvetica', 'bold');
-    doc.text('Mardi Jayadi', 190, y, { align: 'right' });
+    doc.text(companyProfile.contactPerson, 195, y, { align: 'right' });
     y += 5;
     doc.setFont('helvetica', 'normal');
-    doc.text('Direktur', 190, y, { align: 'right' });
+    doc.text('Direktur', 195, y, { align: 'right' });
 
     doc.save(`Laporan_Keuangan_${reportMonth.replace(' ', '_')}.pdf`);
   };

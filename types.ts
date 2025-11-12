@@ -51,3 +51,11 @@ export interface TelegramSettings {
   botToken: string;
   chatId: string;
 }
+
+export interface CompanyProfile {
+  name: string;
+  address: string;
+  contactPerson: string;
+  email: string;
+  logo: string; // base64 encoded image
+}
