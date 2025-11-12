@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord } from './types';
@@ -37,6 +37,8 @@ function App() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [confirmingPaymentCustomer, setConfirmingPaymentCustomer] = useState<Customer | null>(null);
+  
+  const logoutTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -47,16 +49,53 @@ function App() {
     }
   }, [theme]);
 
+  const handleLogout = () => {
+    if (logoutTimer.current) {
+        clearTimeout(logoutTimer.current);
+    }
+    setIsLoggedIn(false);
+  };
+
+  // Auto-logout logic
+  useEffect(() => {
+    const resetTimer = () => {
+      if (logoutTimer.current) {
+        clearTimeout(logoutTimer.current);
+      }
+      logoutTimer.current = window.setTimeout(() => {
+        handleLogout();
+      }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    };
+
+    if (isLoggedIn) {
+      const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+      
+      const eventHandler = () => resetTimer();
+
+      events.forEach(event => {
+        window.addEventListener(event, eventHandler, true);
+      });
+
+      resetTimer(); // Start the timer on login/page load
+
+      return () => {
+        events.forEach(event => {
+          window.removeEventListener(event, eventHandler, true);
+        });
+        if (logoutTimer.current) {
+          clearTimeout(logoutTimer.current);
+        }
+      };
+    }
+  }, [isLoggedIn]);
+
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
   };
 
   // Transaction handlers
