@@ -23,6 +23,8 @@ export interface Transaction {
 export enum SubscriptionType {
   PPPOE = 'PPPOE',
   VOUCHER = 'VOUCHER',
+  STATIK = 'STATIK',
+  MITRA_VOUCHER = 'Mitra Voucher',
 }
 
 // FIX: Define the PaymentRecord interface for customer payment history.

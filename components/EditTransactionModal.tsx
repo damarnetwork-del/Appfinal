@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 // FIX: Added file extension to import statement
 import { Transaction, TransactionType, TransactionMethod } from '../types.ts';
@@ -13,6 +12,7 @@ interface EditTransactionModalProps {
 const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onClose, transaction, updateTransaction }) => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
+  const [date, setDate] = useState('');
   const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
   const [method, setMethod] = useState<TransactionMethod>(TransactionMethod.TRANSFER);
   const [error, setError] = useState('');
@@ -21,6 +21,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
     if (transaction) {
       setDescription(transaction.description);
       setAmount(String(transaction.amount));
+      setDate(transaction.date.split('T')[0]); // Set date in YYYY-MM-DD format
       setType(transaction.type);
       setMethod(transaction.method);
       setError('');
@@ -33,8 +34,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim() || !amount.trim() || parseFloat(amount) <= 0) {
-      setError('Deskripsi dan jumlah harus diisi dengan benar.');
+    if (!description.trim() || !amount.trim() || parseFloat(amount) <= 0 || !date) {
+      setError('Deskripsi, jumlah, dan tanggal harus diisi dengan benar.');
       return;
     }
 
@@ -42,6 +43,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
       ...transaction,
       description,
       amount: parseFloat(amount),
+      date: new Date(date + 'T00:00:00').toISOString(), // Ensure date is local
       type,
       method,
     });
@@ -65,6 +67,16 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ isOpen, onC
                   className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
           </div>
+           <div>
+                <label htmlFor="edit-date" className="block text-sm font-medium text-gray-700">Tanggal</label>
+                <input
+                    type="date"
+                    id="edit-date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+            </div>
           <div>
               <label htmlFor="edit-amount" className="block text-sm font-medium text-gray-700">Jumlah (Rp)</label>
               <input
