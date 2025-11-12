@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Transaction, TransactionType, TransactionMethod, Customer, PaymentRecord, TelegramSettings, CompanyProfile } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
+import { getAppData, saveAppData } from './services/storage';
 
 import LoginPage from './components/LoginPage';
 import Summary from './components/Summary';
@@ -23,15 +24,17 @@ const SettingsIcon = () => (
 
 
 function App() {
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>('transactions', []);
-  const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', []);
   const [isLoggedIn, setIsLoggedIn] = useLocalStorage('isLoggedIn', false);
-  const [telegramSettings, setTelegramSettings] = useLocalStorage<TelegramSettings>('telegramSettings', {
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [telegramSettings, setTelegramSettings] = useState<TelegramSettings>({
     enabled: false,
     botToken: '',
     chatId: '',
   });
-  const [companyProfile, setCompanyProfile] = useLocalStorage<CompanyProfile>('companyProfile', {
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({
     name: 'Damar Global Network',
     address: 'Jl. Kemajuan No. 123, Jakarta Pusat, Indonesia',
     contactPerson: 'Mardi Jayadi',
@@ -45,6 +48,41 @@ function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   const logoutTimer = useRef<number | null>(null);
+  const isInitialDataLoaded = useRef(false);
+
+  // Effect to load data from storage when the app is opened and user is logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      setIsLoading(true);
+      isInitialDataLoaded.current = false;
+      getAppData().then(data => {
+        setTransactions(data.transactions || []);
+        setCustomers(data.customers || []);
+        setTelegramSettings(data.telegramSettings || { enabled: false, botToken: '', chatId: '' });
+        setCompanyProfile(data.companyProfile || { name: 'Damar Global Network', address: '', contactPerson: '', email: '', logo: ''});
+        setIsLoading(false);
+        isInitialDataLoaded.current = true; // Mark initial data as loaded
+      });
+    } else {
+        isInitialDataLoaded.current = false; // Reset on logout
+    }
+  }, [isLoggedIn]);
+
+  // Effect to save all data to storage on any change
+  useEffect(() => {
+    // Don't save if data hasn't been loaded yet or user is logged out
+    if (!isInitialDataLoaded.current || !isLoggedIn) {
+      return; 
+    }
+
+    const appData = {
+      transactions,
+      customers,
+      telegramSettings,
+      companyProfile,
+    };
+    saveAppData(appData);
+  }, [transactions, customers, telegramSettings, companyProfile, isLoggedIn]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -187,11 +225,7 @@ function App() {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    sendTelegramNotification(
-        "User Login",
-        `_User 'admin' berhasil login._`,
-        transactions
-    );
+    // Notification will be sent after data is loaded via useEffect
   };
 
   // Transaction handlers
@@ -323,9 +357,22 @@ function App() {
     setConfirmingPaymentCustomer(null);
   };
 
-
   if (!isLoggedIn) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  if (isLoading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+                <svg className="animate-spin h-10 w-10 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p className="mt-4 text-gray-600">Memuat data Anda...</p>
+            </div>
+        </div>
+    );
   }
 
   return (
