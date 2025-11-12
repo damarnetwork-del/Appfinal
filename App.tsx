@@ -46,6 +46,58 @@ function App() {
   
   const logoutTimer = useRef<number | null>(null);
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
+
+  const sendTelegramNotification = async (notificationType: string, details: string, allTransactions: Transaction[]) => {
+      const { enabled, botToken, chatId } = telegramSettings;
+      if (!enabled || !botToken || !chatId) return;
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      allTransactions.forEach(t => {
+          if (t.type === TransactionType.INCOME) totalIncome += t.amount;
+          else totalExpense += t.amount;
+      });
+
+      const balance = totalIncome - totalExpense;
+      const timestamp = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+      const message = [
+          `*🔔 Notifikasi Aplikasi*`,
+          `--------------------------------------`,
+          `*Jenis Notifikasi:* ${notificationType}`,
+          `*User Login:* admin`,
+          `*Waktu:* ${timestamp}`,
+          details ? `\n${details}\n` : '',
+          `--------------------------------------`,
+          `*Ringkasan Keuangan:*`,
+          `- *Pemasukan:* ${formatCurrency(totalIncome)}`,
+          `- *Pengeluaran:* ${formatCurrency(totalExpense)}`,
+          `- *Saldo:* ${formatCurrency(balance)}`
+      ].join('\n').replace(/\n\n/g, '\n');
+
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+      try {
+          await fetch(url, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  chat_id: chatId,
+                  text: message,
+                  parse_mode: 'Markdown',
+              }),
+          });
+      } catch (error) {
+          console.error("Failed to send Telegram notification:", error);
+      }
+  };
+
   const handleLogout = () => {
     if (logoutTimer.current) {
         clearTimeout(logoutTimer.current);
@@ -135,58 +187,12 @@ function App() {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
+    sendTelegramNotification(
+        "User Login",
+        `_User 'admin' berhasil login._`,
+        transactions
+    );
   };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-  };
-
-  const sendTelegramNotification = async (newTransaction: Transaction, allTransactions: Transaction[]) => {
-      const { enabled, botToken, chatId } = telegramSettings;
-      if (!enabled || !botToken || !chatId) return;
-
-      let totalIncome = 0;
-      let totalExpense = 0;
-
-      allTransactions.forEach(t => {
-          if (t.type === TransactionType.INCOME) totalIncome += t.amount;
-          else totalExpense += t.amount;
-      });
-
-      const balance = totalIncome - totalExpense;
-
-      const message = [
-          `*Transaksi Baru*`,
-          `--------------------------------------`,
-          `- *Jenis Transaksi:* ${newTransaction.type === TransactionType.INCOME ? 'Pemasukan' : 'Pengeluaran'}`,
-          `- *Deskripsi:* ${newTransaction.description}`,
-          `- *Nominal:* ${formatCurrency(newTransaction.amount)}`,
-          `--------------------------------------`,
-          `*Ringkasan Keuangan Saat Ini:*`,
-          `- *Total Pemasukan:* ${formatCurrency(totalIncome)}`,
-          `- *Total Pengeluaran:* ${formatCurrency(totalExpense)}`,
-          `- *Saldo Total:* ${formatCurrency(balance)}`
-      ].join('\n');
-
-      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-      try {
-          await fetch(url, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                  chat_id: chatId,
-                  text: message,
-                  parse_mode: 'Markdown',
-              }),
-          });
-      } catch (error) {
-          console.error("Failed to send Telegram notification:", error);
-      }
-  };
-
 
   // Transaction handlers
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
@@ -196,17 +202,36 @@ function App() {
     };
     const updatedTransactions = [...transactions, newTransaction];
     setTransactions(updatedTransactions);
-    sendTelegramNotification(newTransaction, updatedTransactions);
+    sendTelegramNotification(
+        `Transaksi Baru (${newTransaction.type === TransactionType.INCOME ? 'Pemasukan' : 'Pengeluaran'})`,
+        `*Deskripsi:* ${newTransaction.description}\n*Jumlah:* ${formatCurrency(newTransaction.amount)}`,
+        updatedTransactions
+    );
   };
 
   const deleteTransaction = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-        setTransactions(prev => prev.filter(t => t.id !== id));
+        const transactionToDelete = transactions.find(t => t.id === id);
+        if (transactionToDelete) {
+            const updatedTransactions = transactions.filter(t => t.id !== id);
+            setTransactions(updatedTransactions);
+            sendTelegramNotification(
+                "Transaksi Dihapus",
+                `*Deskripsi:* ${transactionToDelete.description}\n*Jumlah:* ${formatCurrency(transactionToDelete.amount)}`,
+                updatedTransactions
+            );
+        }
     }
   };
 
   const updateTransaction = (updatedTransaction: Transaction) => {
-    setTransactions(prev => prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
+    const updatedTransactions = transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t);
+    setTransactions(updatedTransactions);
+    sendTelegramNotification(
+        "Transaksi Diperbarui",
+        `*Deskripsi:* ${updatedTransaction.description}\n*Jumlah:* ${formatCurrency(updatedTransaction.amount)}`,
+        updatedTransactions
+    );
     setEditingTransaction(null);
   };
 
@@ -224,26 +249,61 @@ function App() {
       lastBilledMonth: `${currentYear}-${currentMonth}`,
     };
     setCustomers(prev => [...prev, newCustomer]);
+    sendTelegramNotification(
+        "Pelanggan Baru Ditambahkan",
+        `*Nama:* ${newCustomer.name}\n*Jenis Langganan:* ${newCustomer.subscriptionType}\n*Tagihan Bulanan:* ${formatCurrency(newCustomer.amount)}`,
+        transactions
+    );
   };
 
   const deleteCustomer = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?')) {
-        setCustomers(prev => prev.filter(c => c.id !== id));
+        const customerToDelete = customers.find(c => c.id === id);
+        if (customerToDelete) {
+            setCustomers(prev => prev.filter(c => c.id !== id));
+            sendTelegramNotification(
+                "Pelanggan Dihapus",
+                `*Nama:* ${customerToDelete.name}`,
+                transactions
+            );
+        }
     }
   };
 
   const updateCustomer = (updatedCustomer: Customer) => {
     setCustomers(prev => prev.map(c => c.id === updatedCustomer.id ? updatedCustomer : c));
+    sendTelegramNotification(
+        "Data Pelanggan Diperbarui",
+        `*Nama:* ${updatedCustomer.name}`,
+        transactions
+    );
     setEditingCustomer(null);
   };
 
   const confirmPayment = (customerId: string, paymentAmount: number) => {
+    const customer = customers.find(c => c.id === customerId);
+    if (!customer) {
+        setConfirmingPaymentCustomer(null);
+        return;
+    }
+
     const paymentRecord: PaymentRecord = {
       date: new Date().toISOString(),
       amount: paymentAmount,
     };
     
-    // Update customer's due amount and payment history
+    const newTransaction: Transaction = {
+        id: uuidv4(),
+        description: `Pembayaran tagihan dari ${customer.name}`,
+        amount: paymentAmount,
+        type: TransactionType.INCOME,
+        method: TransactionMethod.TRANSFER, // Assuming transfer
+        date: new Date().toISOString(),
+    };
+
+    const updatedTransactions = [...transactions, newTransaction];
+    setTransactions(updatedTransactions);
+    
     setCustomers(prev => prev.map(c => 
         c.id === customerId 
         ? { 
@@ -254,17 +314,11 @@ function App() {
         : c
     ));
     
-    // Add transaction record
-    const customer = customers.find(c => c.id === customerId);
-    if (customer) {
-        addTransaction({
-            description: `Pembayaran tagihan dari ${customer.name}`,
-            amount: paymentAmount,
-            type: TransactionType.INCOME,
-            method: TransactionMethod.TRANSFER, // Assuming transfer
-            date: new Date().toISOString(),
-        });
-    }
+    sendTelegramNotification(
+        "Pembayaran Tagihan Diterima",
+        `*Pelanggan:* ${customer.name}\n*Jumlah Dibayar:* ${formatCurrency(paymentAmount)}`,
+        updatedTransactions
+    );
 
     setConfirmingPaymentCustomer(null);
   };
@@ -317,6 +371,7 @@ function App() {
             deleteCustomer={deleteCustomer}
             onEdit={(c) => setEditingCustomer(c)}
             onConfirmPayment={(c) => setConfirmingPaymentCustomer(c)}
+            companyProfile={companyProfile}
         />
       </main>
       

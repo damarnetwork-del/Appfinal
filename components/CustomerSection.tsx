@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Customer, SubscriptionType } from '../types';
+import { Customer, SubscriptionType, CompanyProfile } from '../types';
 import Card from './Card';
 
 interface CustomerSectionProps {
@@ -8,9 +8,10 @@ interface CustomerSectionProps {
   deleteCustomer: (id: string) => void;
   onEdit: (customer: Customer) => void;
   onConfirmPayment: (customer: Customer) => void;
+  companyProfile: CompanyProfile;
 }
 
-const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustomer, deleteCustomer, onEdit, onConfirmPayment }) => {
+const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustomer, deleteCustomer, onEdit, onConfirmPayment, companyProfile }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [subscriptionType, setSubscriptionType] = useState<SubscriptionType>(SubscriptionType.PPPOE);
@@ -43,6 +44,26 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
       return { text: 'Lunas', color: 'text-green-700', bgColor: 'bg-green-100' };
     }
     return { text: 'Belum Bayar', color: 'text-red-700', bgColor: 'bg-red-100' };
+  };
+
+  const handleRemind = (customer: Customer) => {
+    if (customer.dueAmount <= 0) return;
+
+    // Format phone number for WhatsApp link (e.g., from 08... to 628...)
+    const formattedPhone = customer.phone.startsWith('0') ? '62' + customer.phone.substring(1) : customer.phone;
+    
+    const message = `Yth. Bapak/Ibu ${customer.name},
+
+Kami dari ${companyProfile.name} ingin mengingatkan mengenai tagihan bulanan Anda yang telah jatuh tempo.
+
+Total Tagihan: *${formatCurrency(customer.dueAmount)}*
+
+Mohon untuk segera melakukan pembayaran. Jika Anda sudah membayar, mohon abaikan pesan ini.
+
+Terima kasih.`;
+
+    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const filteredCustomers = useMemo(() => {
@@ -148,6 +169,7 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ customers, addCustome
                            </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                          <button onClick={() => handleRemind(c)} className="text-yellow-600 hover:text-yellow-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed" disabled={c.dueAmount <= 0}>Ingatkan</button>
                           <button onClick={() => onConfirmPayment(c)} className="text-green-600 hover:text-green-800 font-medium" disabled={c.dueAmount <= 0}>Bayar</button>
                           <button onClick={() => onEdit(c)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
                           <button onClick={() => deleteCustomer(c.id)} className="text-red-600 hover:text-red-800 font-medium">Hapus</button>
